@@ -2,17 +2,34 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
+  const latestMouse = useRef({ x: 0, y: 0 });
+  const latestScroll = useRef(0);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const scheduleUpdate = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        setMousePosition(latestMouse.current);
+        setScrollY(latestScroll.current);
+        rafRef.current = null;
+      });
+    };
+
+    const handleScroll = () => {
+      latestScroll.current = window.scrollY;
+      scheduleUpdate();
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      latestMouse.current = { x: e.clientX, y: e.clientY };
+      scheduleUpdate();
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -20,6 +37,10 @@ export default function Home() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouseMove);
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, []);
 
@@ -60,7 +81,7 @@ export default function Home() {
             : "bg-transparent border-b border-purple-primary/10"
         }`}
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 ml-12!">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <Link
@@ -176,10 +197,10 @@ export default function Home() {
           ></div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 mt-6!">
           <div className="text-center space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center justify-center mb-6 animate-fade-in-up">
+            <div className="inline-flex items-center justify-center mt-12! animate-fade-in-up">
               <div className="badge-glow">
                 <span className="text-sm font-semibold text-purple-light flex items-center gap-2">
                   <span className="text-lg">🚀</span> Transformamos Ideas en
@@ -189,7 +210,7 @@ export default function Home() {
             </div>
 
             {/* Main Heading - Enhanced Typography */}
-            <h1 className="text-7xl md:text-8xl lg:text-9xl font-extrabold mb-4 leading-[0.95] tracking-tighter">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-extrabold mb-4 leading-[0.95] tracking-tighter">
               <span className="block text-white mb-6 font-black drop-shadow-2xl">
                 Software
               </span>
@@ -211,7 +232,7 @@ export default function Home() {
 
             {/* Subtitle - Better spaced and readable */}
             <p
-              className="text-lg md:text-xl lg:text-2xl text-gray-medium mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up opacity-90"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-medium mb-8  mx-auto leading-relaxed animate-fade-in-up opacity-90 w-full"
               style={{ animationDelay: "0.1s" }}
             >
               Creamos soluciones tecnológicas{" "}
@@ -229,12 +250,12 @@ export default function Home() {
 
             {/* CTA Buttons - Enhanced */}
             <div
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12 animate-fade-in-up"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 animate-fade-in-up"
               style={{ animationDelay: "0.2s" }}
             >
               <button
                 onClick={() => window.open('https://api.whatsapp.com/send/?phone=573105752462&text=Hola%2C+me+gustar%C3%ADa+m%C3%A1s+informaci%C3%B3n.&type=phone_number&app_absent=0', '_blank')}
-                className="group relative px-12 py-4 bg-gradient-to-r from-purple-primary via-purple-dark to-purple-deep rounded-xl font-bold text-lg text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-primary/50 hover:scale-105 hover:-translate-y-1 glow"
+                className="group relative w-full sm:w-auto px-8 sm:px-12 py-3.5 sm:py-4 bg-gradient-to-r from-purple-primary via-purple-dark to-purple-deep rounded-xl font-bold text-base sm:text-lg text-white p-2! m-4! overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-primary/50 hover:scale-105 hover:-translate-y-1 glow"
               >
                 <span className="relative z-10 flex items-center gap-2 justify-center md:justify-start">
                   Iniciar Proyecto
@@ -255,9 +276,9 @@ export default function Home() {
                 <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
               </button>
 
-              <button
+              {/* <button
                 onClick={() => scrollToSection("portfolio")}
-                className="group relative px-12 py-4 border-2 border-purple-primary/50 rounded-xl font-bold text-lg text-purple-light hover:text-white transition-all duration-300 hover:border-purple-primary hover:bg-purple-primary/10 hover:shadow-lg hover:shadow-purple-primary/20 hover:scale-105 hover:-translate-y-1"
+                className="group relative w-full sm:w-auto px-8 sm:px-12 py-3.5 sm:py-4 border-2 border-purple-primary/50 rounded-xl font-bold text-base sm:text-lg text-purple-light hover:text-white transition-all duration-300 hover:border-purple-primary hover:bg-purple-primary/10 hover:shadow-lg hover:shadow-purple-primary/20 hover:scale-105 hover:-translate-y-1"
               >
                 <span className="relative z-10 flex items-center gap-2 justify-center md:justify-start">
                   Ver Portfolio
@@ -281,7 +302,7 @@ export default function Home() {
                     />
                   </svg>
                 </span>
-              </button>
+              </button> */}
             </div>
 
             {/* Tech Stack Icons - Better display */}
@@ -289,7 +310,7 @@ export default function Home() {
               className="animate-fade-in-up"
               style={{ animationDelay: "0.3s" }}
             >
-              <p className="text-xs md:text-sm text-gray-dark mb-6 uppercase tracking-widest font-semibold">
+              <p className="text-xs md:text-sm text-gray-dark mb-6 uppercase tracking-widest font-semibold mb-4!">
                 Tecnologías que dominamos
               </p>
               <div className="flex flex-wrap justify-center gap-3 md:gap-4">
@@ -315,36 +336,36 @@ export default function Home() {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+        {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
           <div className="w-8 h-12 border-2 border-purple-primary/50 rounded-full flex items-start justify-center p-2 hover:border-purple-primary transition-colors">
             <div className="w-1.5 h-3 bg-purple-primary rounded-full animate-pulse"></div>
           </div>
           <p className="text-xs text-gray-dark text-center mt-4 uppercase tracking-wider font-semibold">
             Desplázate
           </p>
-        </div>
+        </div> */}
       </section>
 
       {/* Services Section */}
       <section
         id="servicios"
-        className="py-32 px-4 relative items-center justify-center !p-4"
+        className="my-8 py-20 sm:py-28 lg:py-32 px-4 relative items-center justify-center"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black-primary via-black-secondary/20 to-black-primary items-center "></div>
         <div className="absolute top-0 left-0 right-0 h-px section-divider"></div>
 
         <div className="p-4 mx-auto relative z-10 w-full">
           {/* Section Header - Enhanced */}
-          <div className="text-center mb-24">
+          <div className="text-center mb-12 sm:mb-20 lg:mb-24 p-6!">
             <div className="inline-block mb-4 animate-fade-in-up"></div>
             <h2
-              className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in-up"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 animate-fade-in-up"
               style={{ animationDelay: "0.1s" }}
             >
               <span className="gradient-text">Soluciones a tu Medida</span>
             </h2>
             <p
-              className="text-gray-medium text-lg md:text-xl !p-4 mx-auto leading-relaxed animate-fade-in-up text-center items-center"
+              className="text-gray-medium text-base sm:text-lg md:text-xl mx-auto leading-relaxed animate-fade-in-up text-center items-center"
               style={{ animationDelay: "0.2s" }}
             >
               Ofrecemos un ecosistema completo de servicios tecnológicos para
@@ -353,11 +374,11 @@ export default function Home() {
           </div>
 
           {/* Services Grid - 3 columns with better spacing */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 place-items-center mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 place-items-center mt-4 p-6!">
             {services.map((service, index) => (
               <div
                 key={index}
-                className="!p-2 group relative w-full p-8 md:p-12 rounded-3xl glass hover:border-purple-primary/80 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-purple-primary/50 cursor-pointer service-card border border-purple-primary/40 hover:cursor-pointer"
+                className="group relative w-full p-6 sm:p-8 md:p-12 rounded-3xl glass hover:border-purple-primary/80 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-purple-primary/50 cursor-pointer service-card border border-purple-primary/40"
                 style={{ animationDelay: `${0.1 * index}s` }}
               >
                 {/* Animated Background Gradient */}
@@ -370,8 +391,8 @@ export default function Home() {
                 ></div>
 
                 {/* Icon - Enhanced */}
-                <div className="relative mb-8">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-primary/30 to-purple-dark/30 flex items-center justify-center text-6xl group-hover:scale-150 group-hover:rotate-12 transition-all duration-400 border border-purple-primary/50 shadow-2xl shadow-purple-primary/30 group-hover:shadow-purple-primary/60">
+                <div className="relative mb-6 sm:mb-8">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-purple-primary/30 to-purple-dark/30 flex items-center justify-center text-4xl sm:text-5xl md:text-6xl group-hover:scale-125 group-hover:rotate-12 transition-all duration-400 border border-purple-primary/50 shadow-2xl shadow-purple-primary/30 group-hover:shadow-purple-primary/60">
                     {service.icon}
                   </div>
                   <div className="absolute -inset-4 bg-purple-primary/30 rounded-2xl blur-2xl opacity-30 group-hover:opacity-100 transition-all duration-500 -z-10 group-hover:blur-3xl"></div>
@@ -417,35 +438,35 @@ export default function Home() {
       </section>
 
       {/* Why Us Section */}
-      <section className="py-32 px-4 flex overflow-hidden !items-center !justify-center !p-4 !w-full" id="portfolio">
+      <section className="my-8 py-20 sm:py-28 lg:py-32 px-4 flex overflow-hidden items-center justify-center w-full pt-6! pb-6!" id="portfolio">
         <div className="absolute inset-0 particles-bg"></div>
         <div className="absolute top-0 left-0 right-0 h-px section-divider"></div>
 
-        <div className="max-w-6xl mx-auto relative z-10 w-full items-center flex-col  justify-center gap-8">
-          <div className="flex">
+        <div className="max-w-6xl mx-auto relative z-10 w-full flex flex-col items-center! justify-center! gap-8 w-full">
+          <div className="flex flex-col gap-8 w-full">
             {/* Section Header */}
-            <div className="text-center mb-24 w-full items-center justify-center">
+            <div className="text-center mb-10 sm:mb-16 w-full! items-center justify-center">
               <h2
-                className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in-up"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 animate-fade-in-up"
                 style={{ animationDelay: "0.1s" }}
               >
                 <span className="gradient-text">Números que Hablan</span>
               </h2>
               <p
-                className="text-gray-medium text-lg md:text-xl max-w-2xl mx-auto leading-relaxed animate-fade-in-up !w-full"
+                className="text-gray-medium text-base sm:text-lg md:text-xl  mx-auto leading-relaxed animate-fade-in-up w-full"
                 style={{ animationDelay: "0.2s" }}
               >
-                Nuestra trayectoria y compromiso nos respaldan como líderes en
+                Nuestra compromiso nos respaldan como líderes en
                 desarrollo de software
               </p>
             </div>
 
             {/* Stats Grid - Enhanced */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20 place-items-center">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-20 place-items-center">
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="group text-center p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-purple-primary/30 w-full"
+                  className="group text-center p-6 sm:p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-purple-primary/30 w-full"
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
                   <div className="relative inline-block mb-6">
@@ -467,12 +488,12 @@ export default function Home() {
             </div>
           </div>
           {/* Benefits Grid */}
-          <div className="!m-8">
+          <div className="mt-8 sm:mt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 place-items-center">
               {benefits.map((benefit, index) => (
                 <div
                   key={index}
-                  className="group flex gap-6 md:gap-8 p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-primary/30 hover:-translate-y-2"
+                  className="group flex flex-col sm:flex-row gap-6 md:gap-8 p-6 sm:p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-primary/30 hover:-translate-y-2"
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
                   <div className="flex-shrink-0">
@@ -496,13 +517,13 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-32 px-4 relative w-full flex !items-center !justify-center !p-4 gap-8" id="sobre-nosotros">
+      <section className="my-8 py-20 sm:py-28 lg:py-32 px-4 relative w-full flex items-center justify-center gap-12 p-6!" id="sobre-nosotros">
         <div className="absolute top-0 left-0 right-0 h-px section-divider"></div>
 
         <div className="max-w-6xl mx-auto  w-full">
-          <div className="!text-center flex-col mb-20 w-full items-center justify-center">
+          <div className="text-center flex-col mb-10 sm:mb-16 w-full items-center justify-center">
             <h2
-              className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in-up"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 animate-fade-in-up"
               style={{ animationDelay: "0.1s" }}
             >
               <span className="gradient-text">
@@ -510,18 +531,18 @@ export default function Home() {
               </span>
             </h2>
             <p
-              className="text-gray-medium text-lg md:text-xl !p-4 mx-auto leading-relaxed animate-fade-in-up text-center items-center" 
+              className="text-gray-medium text-base sm:text-lg md:text-xl mx-auto leading-relaxed animate-fade-in-up text-center items-center" 
               style={{ animationDelay: "0.2s" }}
             >
               Descubre cómo hemos transformado negocios alrededor del mundo
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 place-items-center !mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 place-items-center mt-6! sm:mt-8 ">
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="group relative p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-purple-primary/30"
+                className="group relative p-6 sm:p-8 md:p-10 rounded-2xl glass hover:border-purple-primary/50 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-purple-primary/30"
                 style={{ animationDelay: `${0.1 * index}s` }}
               >
                 {/* Decorative Quote Mark */}
@@ -569,7 +590,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-40 px-4 relative overflow-hidden flex items-center justify-center !p-4 !w-full" id="contacto">
+      <section className="my-8 py-24 sm:py-32 lg:py-40 px-4 relative overflow-hidden flex items-center justify-center w-full" id="contacto">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-primary/15 via-purple-dark/15 to-purple-deep/15"></div>
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-purple-primary/25 rounded-full blur-3xl animate-pulse opacity-70"></div>
@@ -580,29 +601,29 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-deep/15 rounded-full blur-3xl opacity-50"></div>
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-10 w-full">
+        <div className="max-w-5xl mx-auto text-center relative z-10 w-full mt-6! mb-6!">
           
           <h2
-            className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] animate-fade-in-up"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-extrabold mb-8 leading-[1.1] animate-fade-in-up"
             style={{ animationDelay: "0.1s" }}
           >
             <span className="gradient-text">Transformemos tu Visión</span>
             <span className="text-white"> en Realidad</span>
           </h2>
           <p
-            className="text-gray-medium text-lg md:text-xl !p-4 mx-auto leading-relaxed animate-fade-in-up text-center items-center"
+            className="text-gray-medium text-base sm:text-lg md:text-xl mx-auto leading-relaxed animate-fade-in-up text-center items-center"
             style={{ animationDelay: "0.2s" }}
           >
             Agenda una consulta gratuita y descubre cómo podemos potenciar tu
             negocio con tecnología de vanguardia
           </p>
           <div
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20 animate-fade-in-up w-full"
+            className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-20 animate-fade-in-up w-full"
             style={{ animationDelay: "0.3s" }}
           >
             <button
               onClick={() => window.open('https://api.whatsapp.com/send/?phone=573105752462&text=Hola%2C+me+gustar%C3%ADa+m%C3%A1s+informaci%C3%B3n.&type=phone_number&app_absent=0', '_blank')}
-              className="group relative px-14 md:px-16 py-5 md:py-6 bg-gradient-to-r from-purple-primary via-purple-dark to-purple-deep rounded-xl font-bold text-lg md:text-xl text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-primary/70 hover:scale-110 hover:-translate-y-2 glow-strong !m-8 !p-2"
+              className="group relative w-full sm:w-auto px-10 sm:px-14 md:px-16 py-4 sm:py-5 md:py-6 bg-gradient-to-r from-purple-primary via-purple-dark to-purple-deep rounded-xl font-bold text-base sm:text-lg md:text-xl text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-primary/70 hover:scale-105 hover:-translate-y-2 glow-strong p-2! hover:cursor-pointer! m-4!"
             >
               <span className="relative z-10 flex items-center gap-3 justify-center">
                 Contactar Ahora
@@ -626,7 +647,7 @@ export default function Home() {
 
           {/* Trust Badges */}
           <div
-            className="flex flex-col md:flex-row flex-wrap justify-center gap-6 md:gap-8 text-gray-medium animate-fade-in-up w-full"
+            className="flex flex-col md:flex-row flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 text-gray-medium animate-fade-in-up w-full"
             style={{ animationDelay: "0.4s" }}
           >
             <div className="flex items-center gap-3 px-6 py-4 rounded-lg glass hover:border-purple-primary/50 transition-all duration-300 hover:scale-105">
@@ -678,12 +699,12 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black-secondary/80 backdrop-blur-md border-t border-purple-primary/20 py-20 px-4 !w-full !flex justify-center items-center" >
-        <div className="max-w-6xl mx-auto !w-full ">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 place-items-start">
+      <footer className="bg-black-secondary/80 backdrop-blur-md border-t border-purple-primary/20 py-12 sm:py-16 lg:py-20 px-4 w-full flex justify-center items-center pt-6! pb-6! relative" id="footer">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-16 place-items-start divide-y divide-purple-primary/10 sm:divide-y-0">
             {/* Brand */}
-            <div className="lg:col-span-1">
-              <div className="relative">
+            <div className="lg:col-span-1 text-center sm:text-left pt-6 sm:pt-0">
+              <div className="relative inline-flex items-center justify-center sm:justify-start">
                 <Image
                   src="/logo.jpg"
                   alt="BarcoDev Logo"
@@ -694,12 +715,12 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-primary to-purple-dark rounded-xl animate-pulse opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-300"></div>
               </div>
-              <p className="text-gray-medium text-sm mb-8 leading-relaxed">
+              <p className="text-gray-medium text-sm mt-4 mb-6 sm:mb-8 leading-relaxed">
                 Transformamos ideas en soluciones digitales innovadoras y
                 escalables desde 2014.
               </p>
               {/* Social Links */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 justify-center sm:justify-start">
                 {[
                   { name: "GitHub", icon: "🐙" },
                   { name: "LinkedIn", icon: "💼" },
@@ -708,7 +729,7 @@ export default function Home() {
                   <a
                     key={index}
                     href="#"
-                    className="w-12 h-12 rounded-lg glass flex items-center justify-center text-xl text-gray-medium hover:text-purple-light hover:border-purple-primary/50 transition-all duration-300 hover:scale-110"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg glass flex items-center justify-center text-lg sm:text-xl text-gray-medium hover:text-purple-light hover:border-purple-primary/50 transition-all duration-300 hover:scale-110"
                     aria-label={social.name}
                     title={social.name}
                   >
@@ -719,7 +740,7 @@ export default function Home() {
             </div>
 
             {/* Quick Links */}
-            <div>
+            <div className="hidden sm:block text-center sm:text-left pt-6 sm:pt-0">
               <h4 className="font-bold text-lg text-purple-light mb-6 uppercase tracking-wider">
                 Navegación
               </h4>
@@ -738,7 +759,7 @@ export default function Home() {
             </div>
 
             {/* Services */}
-            <div>
+            <div className="hidden sm:block text-center sm:text-left pt-6 sm:pt-0">
               <h4 className="font-bold text-lg text-purple-light mb-6 uppercase tracking-wider">
                 Servicios
               </h4>
@@ -755,12 +776,12 @@ export default function Home() {
             </div>
 
             {/* Contact */}
-            <div>
-              <h4 className="font-bold text-lg text-purple-light mb-6 uppercase tracking-wider">
+            <div className="text-center sm:text-left pt-6 sm:pt-0 flex flex-col items-center sm:items-start w-full mb-6!">
+              <h4 className="font-bold text-lg text-purple-light mb-4 sm:mb-6 uppercase tracking-wider text-center sm:text-left">
                 Contacto
               </h4>
-              <ul className="space-y-4 text-sm text-gray-medium">
-                <li className="flex items-start gap-3 hover:text-purple-light transition-colors font-medium group">
+              <ul className="space-y-3 sm:space-y-4 text-sm text-gray-medium w-full flex flex-col items-center sm:items-start">
+                <li className="flex items-center sm:items-start gap-3 hover:text-purple-light transition-colors font-medium group justify-center sm:justify-start text-center sm:text-left">
                   <span className="text-purple-primary group-hover:scale-125 transition-transform">
                     📧
                   </span>
@@ -771,19 +792,19 @@ export default function Home() {
                     contacto@barcodev.com
                   </a>
                 </li>
-                <li className="flex items-start gap-3 hover:text-purple-light transition-colors font-medium group">
+                <li className="flex items-center sm:items-start gap-3 hover:text-purple-light transition-colors font-medium group justify-center sm:justify-start text-center sm:text-left">
                   <span className="text-purple-primary group-hover:scale-125 transition-transform">
                     📱
                   </span>
                   <span>+1 (555) 000-0000</span>
                 </li>
-                <li className="flex items-start gap-3 hover:text-purple-light transition-colors font-medium group">
+                <li className="flex items-center sm:items-start gap-3 hover:text-purple-light transition-colors font-medium group justify-center sm:justify-start text-center sm:text-left">
                   <span className="text-purple-primary group-hover:scale-125 transition-transform">
                     📍
                   </span>
                   <span>Remoto Global</span>
                 </li>
-                <li className="flex items-start gap-3 hover:text-purple-light transition-colors font-medium group">
+                <li className="flex items-center sm:items-start gap-3 hover:text-purple-light transition-colors font-medium group justify-center sm:justify-start text-center sm:text-left">
                   <span className="text-purple-primary group-hover:scale-125 transition-transform">
                     🕒
                   </span>
@@ -794,12 +815,12 @@ export default function Home() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="border-t border-purple-primary/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-gray-dark text-sm text-center md:text-left">
+          <div className="border-t border-purple-primary/20 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-6">
+            <p className="text-gray-dark text-xs sm:text-sm text-center md:text-left leading-relaxed">
               &copy; {new Date().getFullYear()} BarcoDev. Todos los derechos
               reservados.
             </p>
-            <div className="flex gap-8 text-sm text-gray-medium flex-wrap justify-center md:justify-end">
+            <div className="flex gap-6 sm:gap-8 text-xs sm:text-sm text-gray-medium flex-wrap justify-center md:justify-end">
               <a
                 href="#"
                 className="hover:text-purple-light transition-colors font-medium hover:underline"
